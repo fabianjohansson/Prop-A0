@@ -19,7 +19,7 @@ public class Program {
 					throw new Exception("Incorrect number of parameters to program.");
 				inputFileName = args[0];
 				outputFileName = args[1];
-				
+
 				parser = new Parser();
 				parser.open(inputFileName);
 				root = parser.parse();
