@@ -17,11 +17,19 @@ public class Tokenizer implements ITokenizer{
     private static final Map<Character,Token> VALID_SYMBOLS;
     private static final HashSet<Character> IDS;
     private static final HashSet<Integer> INTS;
+    private static final HashSet<Character> VALID_TERMS;
+    private static final HashSet<Character>VALID_EXPR;
+    private static final HashSet<Character>VALID_ASSIGN;
 
     static{
         VALID_SYMBOLS = new HashMap<>();
         IDS = new HashSet<>();
         INTS = new HashSet<>();
+
+        VALID_TERMS = new HashSet<>();
+        VALID_EXPR = new HashSet<>();
+        VALID_ASSIGN = new HashSet<>();
+
 
         VALID_SYMBOLS.put('{',Token.LEFT_CURLY);
         VALID_SYMBOLS.put('}',Token.RIGHT_CURLY);
@@ -54,7 +62,7 @@ public class Tokenizer implements ITokenizer{
         scanner.open(fileName);
         scanner.moveNext();
 
-        next = extractLexeme();
+       // next = extractLexeme();
     }
 
 
@@ -66,15 +74,39 @@ public class Tokenizer implements ITokenizer{
 
     @Override
     public void moveNext() throws IOException, TokenizerException {
-
+        if (scanner == null) {
+            throw new IOException("no open file. ");
+        }
+        current = next;
+        if (next.token() != Token.EOF){
+            next = extractLexeme();
+        }
     }
 
     @Override
     public void close() throws IOException {
 
+        if (scanner != null){
+            scanner.close();
+        }
     }
-    private Lexeme extractLexeme() {
-    }
+    private Lexeme extractLexeme() throws TokenizerException {
 
+        char ch = scanner.current();
+        if (VALID_SYMBOLS.containsKey(ch)) {
+            return new Lexeme(ch, VALID_SYMBOLS.get(ch));
+        } else if (Character.isLetter(ch)) {
+            if (IDS.contains(ch)) {
+                return new Lexeme(ch, Token.IDENT);
+            }
+
+        } else if (Character.isDigit(ch)) {
+            if (INTS.contains(ch)) {
+                return new Lexeme(ch, Token.INT_LIT);
+            }
+        } else {
+            throw new TokenizerException("invalid character" + ch);
+        }return null;
+    }
 
 }
