@@ -1,0 +1,62 @@
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Tokenizer implements ITokenizer{
+    private Lexeme current = null;
+    private Lexeme next = null;
+    private Scanner scanner = null;
+
+    private static final Map<Character,Token> VALID_SYMBOLS;
+
+    static{
+        VALID_SYMBOLS = new HashMap<>();
+
+        VALID_SYMBOLS.put('{',Token.LEFT_CURLY);
+        VALID_SYMBOLS.put('}',Token.RIGHT_CURLY);
+        VALID_SYMBOLS.put('+',Token.ADD_OP);
+        VALID_SYMBOLS.put('=',Token.ASSIGN_OP);
+        VALID_SYMBOLS.put('/',Token.DIV_OP);
+        VALID_SYMBOLS.put(Scanner.EOF,Token.EOF);
+        VALID_SYMBOLS.put('*',Token.MULT_OP);
+        VALID_SYMBOLS.put('-',Token.SUB_OP);
+        VALID_SYMBOLS.put(';',Token.SEMICOLON);
+        VALID_SYMBOLS.put(null,Token.NULL);
+
+    }
+
+    public Tokenizer(){
+
+    }
+
+    @Override
+    public void open(String fileName) throws IOException, TokenizerException {
+        scanner = new Scanner();
+        scanner.open(fileName);
+        scanner.moveNext();
+
+
+    }
+
+    @Override
+    public Lexeme current() {
+        return null;
+    }
+
+    @Override
+    public void moveNext() throws IOException, TokenizerException {
+
+    }
+
+    @Override
+    public void close() throws IOException {
+
+    }
+    //ID,int,term,expr,assign,
+/*
+* The tokenizer should call the Scanner to get a stream of characters, and from
+that stream of characters create a stream of lexemes/tokens. You should
+implement a Tokenizer class, which implements the interface ITokenizer
+* */
+
+}
