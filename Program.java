@@ -7,7 +7,7 @@ public class Program {
 	public static void main(String[] args) {
 		String inputFileName = null;
 		String outputFileName = null;
-		prop.assignment0.IParser parser = null;
+		IParser parser = null;
 		INode root = null; // Root of the parse tree.
 		StringBuilder builder = null;
 		FileOutputStream stream = null;
