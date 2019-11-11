@@ -1,6 +1,13 @@
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+//ID,int,term,expr,assign,
+/*
+* The tokenizer should call the Scanner to get a stream of characters, and from
+that stream of characters create a stream of lexemes/tokens. You should
+implement a Tokenizer class, which implements the interface ITokenizer
+* */
 
 public class Tokenizer implements ITokenizer{
     private Lexeme current = null;
@@ -8,9 +15,13 @@ public class Tokenizer implements ITokenizer{
     private Scanner scanner = null;
 
     private static final Map<Character,Token> VALID_SYMBOLS;
+    private static final HashSet<Character> IDS;
+    private static final HashSet<Integer> INTS;
 
     static{
         VALID_SYMBOLS = new HashMap<>();
+        IDS = new HashSet<>();
+        INTS = new HashSet<>();
 
         VALID_SYMBOLS.put('{',Token.LEFT_CURLY);
         VALID_SYMBOLS.put('}',Token.RIGHT_CURLY);
@@ -22,6 +33,14 @@ public class Tokenizer implements ITokenizer{
         VALID_SYMBOLS.put('-',Token.SUB_OP);
         VALID_SYMBOLS.put(';',Token.SEMICOLON);
         VALID_SYMBOLS.put(null,Token.NULL);
+
+        for(int i = 0; i < 10; i++){
+            INTS.add(i);
+        }
+        for(int j = 97; j < 123; j++ ){
+            char temp = (char)j;
+            IDS.add(temp);
+        }
 
     }
 
@@ -35,12 +54,14 @@ public class Tokenizer implements ITokenizer{
         scanner.open(fileName);
         scanner.moveNext();
 
-
+        next = extractLexeme();
     }
+
+
 
     @Override
     public Lexeme current() {
-        return null;
+        return current;
     }
 
     @Override
@@ -52,11 +73,8 @@ public class Tokenizer implements ITokenizer{
     public void close() throws IOException {
 
     }
-    //ID,int,term,expr,assign,
-/*
-* The tokenizer should call the Scanner to get a stream of characters, and from
-that stream of characters create a stream of lexemes/tokens. You should
-implement a Tokenizer class, which implements the interface ITokenizer
-* */
+    private Lexeme extractLexeme() {
+    }
+
 
 }
