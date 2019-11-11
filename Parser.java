@@ -31,8 +31,13 @@ public class Parser implements IParser {
     }
     private class BlockNode implements INode{
 
+        private INode s;
+        private BlockNode bN;
         public BlockNode (Tokenizer tok){
-
+            s = new StatementsNode(tok);
+            if (tok.current().token() != Token.EOF) {
+                bN = new BlockNode(tok);
+            }
         }
         @Override
         public Object evaluate(Object[] args) throws Exception {
@@ -42,6 +47,7 @@ public class Parser implements IParser {
         @Override
         public void buildString(StringBuilder builder, int tabs) {
 
+            //recursive genom alla
         }
     }
     private class StatementsNode implements INode{
@@ -58,6 +64,7 @@ public class Parser implements IParser {
     }
     private class AssignmentNode implements INode{
 
+        if
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;
