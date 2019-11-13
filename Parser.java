@@ -57,12 +57,15 @@ public class Parser implements IParser {
                 System.out.println(tok.current());
                 tok.moveNext();
                 s = new StatementsNode(tok);
-
+                System.out.println("are wer here?");
+                System.out.println(tok.current());
                 if (tok.current().token() == Token.RIGHT_CURLY) {
+                    System.out.println(tok.current());
                     tok.moveNext();
                     if (tok.current().token() != Token.EOF) {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
+                    System.out.println(tok.current());
                 } else {
                     throw new TokenizerException(TOKENIZERMESSAGE);
                 }
@@ -97,9 +100,8 @@ public class Parser implements IParser {
             if (tok.current().token() == Token.IDENT) {
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
-            } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
             }
+            System.out.println(tok.current());
         }
 
         @Override
@@ -136,7 +138,7 @@ public class Parser implements IParser {
 
                     eN = new ExpressionNode(tok);
                     if (tok.current().token() == Token.SEMICOLON) {
-                        System.out.println(tok.current());
+                        System.out.println(tok.current() + "end end end");
                         tok.moveNext();
 
                     } else {
