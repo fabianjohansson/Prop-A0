@@ -14,11 +14,9 @@ public class Parser implements IParser {
     public void open(String fileName) throws IOException, TokenizerException {
 
         tokenizer = new Tokenizer();
-        System.out.println("tes3");
         tokenizer.open(fileName);
-        System.out.println("test4");
         tokenizer.moveNext();
-        System.out.println("test5");
+
     }
 
     @Override
@@ -86,7 +84,7 @@ public class Parser implements IParser {
         private StatementsNode sN = null;
 
         public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
-
+            System.out.println("StatementNode");
             if (tok.current().token() == Token.IDENT){
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
@@ -117,15 +115,17 @@ public class Parser implements IParser {
 
 
         public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
-
+            System.out.println("AssignmentNode");
             if (tok.current().token() == Token.IDENT) {
+                System.out.println(tok.current());
                 tok.moveNext();
-
                 if (tok.current().token() == Token.ASSIGN_OP) {
+                    System.out.println(tok.current());
                     tok.moveNext();
 
-                    //eN = new ExpressionNode(tok);
+                    eN = new ExpressionNode(tok);
                     if (tok.current().token() == Token.SEMICOLON) {
+                        System.out.println(tok.current());
                         tok.moveNext();
 
                     }
@@ -152,6 +152,18 @@ public class Parser implements IParser {
 
     private class ExpressionNode implements INode {
 
+        TermNode tM = null;
+
+        public ExpressionNode(Tokenizer tok){
+
+            if(tok.current().token() == Token.IDENT | tok.current().token() == Token.INT_LIT |
+                    tok.current().token() == Token.LEFT_PAREN){
+                System.out.println(tok.current());
+                tM = new TermNode();
+            }
+
+
+        }
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;

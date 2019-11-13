@@ -25,9 +25,7 @@ public class Program {
 				//outputFileName = args[1];
 
 				parser = new Parser();
-				System.out.println("test1");
 				parser.open(inputFileName);
-				System.out.println("test2");
 				root = parser.parse();
 				builder = new StringBuilder();
 				builder.append("PARSE TREE:\n");

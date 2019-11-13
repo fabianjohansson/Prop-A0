@@ -6,7 +6,7 @@ public class Lexeme {
 	public Lexeme(Object value, Token token) {
 		this.value = value;
 		this.token = token;
-		System.out.println("Lexeme:" + value + " " + token);
+		//System.out.println("Lexeme:" + value + " " + token);
 	}
 
 	public Object value() {
