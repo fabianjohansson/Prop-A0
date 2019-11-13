@@ -15,10 +15,10 @@ public class Program {
 		
 		try {
 			try {
-				if (args.length < 2)
+				if (args.length < 0)
 					throw new Exception("Incorrect number of parameters to program.");
-				inputFileName = args[0];
-				outputFileName = args[1];
+				inputFileName = "C:\\Users\\fabian\\Desktop\\Plugg\\HT 2019\\PROP\\Prop-A0\\program2.txt";
+				//outputFileName = args[1];
 
 				parser = new Parser();
 				parser.open(inputFileName);
@@ -29,9 +29,9 @@ public class Program {
 				builder.append("\nEVALUATION:\n");
 				builder.append(root.evaluate(null));
 				
-				stream = new FileOutputStream(outputFileName);
+				/*stream = new FileOutputStream(outputFileName);
 				writer = new OutputStreamWriter(stream);
-				writer.write(builder.toString());
+				writer.write(builder.toString());*/
 			}
 			catch (Exception exception) {
 				System.out.println("EXCEPTION: " + exception);

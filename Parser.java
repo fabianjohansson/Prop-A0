@@ -126,8 +126,8 @@ public class Parser implements IParser {
             }else if (tok.current().token().equals(';')){
                 lex = tok.current();
             }
-                eN = new ExpressionNode(tok);
-                iN = new IDNode(tok);
+                //eN = new ExpressionNode(tok);
+                //iN = new IDNode(tok);
         }
         @Override
         public Object evaluate(Object[] args) throws Exception {

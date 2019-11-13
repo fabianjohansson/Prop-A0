@@ -2,7 +2,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-//ID,int,term,expr,assign,
+import java.lang.StringBuilder;
+
 /*
 * The tokenizer should call the Scanner to get a stream of characters, and from
 that stream of characters create a stream of lexemes/tokens. You should
