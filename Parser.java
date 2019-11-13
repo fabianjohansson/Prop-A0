@@ -8,6 +8,7 @@ import java.io.IOException;
  */
 public class Parser implements IParser {
 
+    private static final String TOKENIZERMESSAGE = "Invalid Symbol";
     private Tokenizer tokenizer = null;
 
     @Override
@@ -51,14 +52,22 @@ public class Parser implements IParser {
 
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
-            System.out.println("BlockNode" );
+            System.out.println("BlockNode");
             if (tok.current().token() == Token.LEFT_CURLY) {
                 System.out.println(tok.current());
                 tok.moveNext();
                 s = new StatementsNode(tok);
 
-            }else if( tok.current().token() == Token.RIGHT_CURLY) {
-                tok.moveNext();
+                if (tok.current().token() == Token.RIGHT_CURLY) {
+                    tok.moveNext();
+                    if(tok.current().token() != Token.EOF){
+                        throw new TokenizerException(TOKENIZERMESSAGE);
+                    }
+                }else{
+                    throw new TokenizerException(TOKENIZERMESSAGE);
+                }
+            }else{
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
         }
 
@@ -85,9 +94,11 @@ public class Parser implements IParser {
 
         public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
             System.out.println("StatementNode");
-            if (tok.current().token() == Token.IDENT){
+            if (tok.current().token() == Token.IDENT) {
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
+            }else{
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
         }
 
@@ -128,13 +139,15 @@ public class Parser implements IParser {
                         System.out.println(tok.current());
                         tok.moveNext();
 
+                    }else{
+                        throw new TokenizerException(TOKENIZERMESSAGE);
                     }
                 } else {
-                    throw new TokenizerException("Invalid Symbol");
+                    throw new TokenizerException(TOKENIZERMESSAGE);
 
                 }
-            }else {
-                throw new TokenizerException("Invalid Symbol");
+            } else {
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
 
         }
@@ -154,16 +167,17 @@ public class Parser implements IParser {
 
         TermNode tM = null;
 
-        public ExpressionNode(Tokenizer tok){
+        public ExpressionNode(Tokenizer tok) {
 
-            if(tok.current().token() == Token.IDENT | tok.current().token() == Token.INT_LIT |
-                    tok.current().token() == Token.LEFT_PAREN){
+            if (tok.current().token() == Token.IDENT | tok.current().token() == Token.INT_LIT |
+                    tok.current().token() == Token.LEFT_PAREN) {
                 System.out.println(tok.current());
                 tM = new TermNode();
             }
 
 
         }
+
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;
