@@ -18,8 +18,8 @@ public class Program {
 				if (args.length < 0)
 					throw new Exception("Incorrect number of parameters to program.");
 
-				inputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\program2.txt";
-				outputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\out.txt";
+				inputFileName = "C:\\Users\\fabian\\Desktop\\Plugg\\HT 2019\\PROP\\Prop-A0\\program2.txt";
+				//outputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\out.txt";
 
 				// inputFileName = args[0];
 				//outputFileName = args[1];
@@ -33,9 +33,9 @@ public class Program {
 				builder.append("\nEVALUATION:\n");
 				builder.append(root.evaluate(null));
 				
-				stream = new FileOutputStream(outputFileName);
+				/*stream = new FileOutputStream(outputFileName);
 				writer = new OutputStreamWriter(stream);
-				writer.write(builder.toString());
+				writer.write(builder.toString());*/
 			}
 			catch (Exception exception) {
 				System.out.println("EXCEPTION: " + exception);

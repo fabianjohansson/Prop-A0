@@ -2,7 +2,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-//ID,int,term,expr,assign,
+import java.lang.StringBuilder;
+
 /*
 * The tokenizer should call the Scanner to get a stream of characters, and from
 that stream of characters create a stream of lexemes/tokens. You should
@@ -88,7 +89,7 @@ public class Tokenizer implements ITokenizer {
         if (VALID_SYMBOLS.containsKey(ch)) {
             scanner.moveNext();
             return new Lexeme(ch, VALID_SYMBOLS.get(ch));
-        } else if (Character.isLetter(ch)) {
+        } else if (Character.isLetter(ch) && Character.isLowerCase(ch)) {
             StringBuilder builder = new StringBuilder();
             while (Character.isLetter(scanner.current())) {
                 builder.append(scanner.current());
