@@ -47,14 +47,16 @@ public class Parser implements IParser {
      * ädrade från private blockode bn till priavte blocknode bn = null
      */
     private class BlockNode implements INode {
-
+        private StringBuilder outBuilder;
+        private Lexeme lex;
         private StatementsNode s = null;
 
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
-            System.out.println("BlockNode");
+            //System.out.println("BlockNode");
             if (tok.current().token() == Token.LEFT_CURLY) {
                 System.out.println(tok.current());
+                lex = tok.current();
                 tok.moveNext();
                 s = new StatementsNode(tok);
 
@@ -78,6 +80,10 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
+            outBuilder.append("BlockNode /n" + lex);
+            System.out.println("/n" + outBuilder);
+            s.buildString(outBuilder, +1);
+
 
             //recursive genom alla
         }
