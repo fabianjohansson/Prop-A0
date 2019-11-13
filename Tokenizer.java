@@ -71,8 +71,15 @@ public class Tokenizer implements ITokenizer {
         }
     }
 
-    private Lexeme extractLexeme() throws TokenizerException, IOException {
+    private void consumeWhiteSpaces() throws IOException{
+        while(Character.isWhitespace(scanner.current())){
+            scanner.moveNext();
+        }
+    }
 
+    private Lexeme extractLexeme() throws TokenizerException, IOException {
+        consumeWhiteSpaces();
+        
         char ch = scanner.current();
         if (VALID_SYMBOLS.containsKey(ch)) {
             return new Lexeme(ch, VALID_SYMBOLS.get(ch));
