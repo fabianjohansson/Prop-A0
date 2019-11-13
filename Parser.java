@@ -52,7 +52,7 @@ public class Parser implements IParser {
 
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
-            System.out.println("BlockNode");
+            System.out.println("BlockNode ");
             if (tok.current().token() == Token.LEFT_CURLY) {
                 System.out.println(tok.current());
                 tok.moveNext();
@@ -93,7 +93,7 @@ public class Parser implements IParser {
         private StatementsNode sN = null;
 
         public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
-            System.out.println("StatementNode");
+            System.out.println("StatementNode ");
             if (tok.current().token() == Token.IDENT) {
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
@@ -126,9 +126,9 @@ public class Parser implements IParser {
 
 
         public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
-            System.out.println("AssignmentNode");
+            System.out.println("AssignmentNode ");
             if (tok.current().token() == Token.IDENT) {
-                System.out.println(tok.current() + "ASSIGN");
+                System.out.println(tok.current() + " ASSIGN");
                 tok.moveNext();
                 if (tok.current().token() == Token.ASSIGN_OP) {
                     System.out.println(tok.current() + " ASSIGN");
@@ -173,13 +173,13 @@ public class Parser implements IParser {
                     || tok.current().token() == Token.LEFT_PAREN) {
                 System.out.println(tok.current() + " EXPR inside if tok = term");
                 tM = new TermNode(tok);
+                System.out.println("error here");
                 if (tok.current().token() == Token.ADD_OP || tok.current().token() == Token.SUB_OP) {
                     //terminal nodes
                     System.out.println(tok.current() + " EXPR if sub/add");
                     tok.moveNext();
                     ExpressionNode eN = new ExpressionNode(tok);
-                } else {
-                    throw new TokenizerException(TOKENIZERMESSAGE);
+                    System.out.println("backinside expr");
                 }
             }
 
@@ -214,7 +214,9 @@ public class Parser implements IParser {
                     tok.moveNext();
                     TermNode tM = new TermNode(tok);
                 }
+                System.out.println("Closing if mul/div");
             }
+            System.out.println("closing term");
         }
 
         @Override
@@ -233,25 +235,31 @@ public class Parser implements IParser {
 
         public FactorNode(Tokenizer tok) throws IOException, TokenizerException {
 
-            //terminal node
-            System.out.println(tok.current() + " Factor ?");
 
-            if (tok.current().token() == Token.LEFT_PAREN) {
+            if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
+                    || tok.current().token() == Token.LEFT_PAREN) {
+                System.out.println(tok.current() + " Factor inside if a Factor");
+
                 //terminal node
-                System.out.println(tok.current());
-                tok.moveNext();
-                System.out.println(tok.current() + " inside left paren if");
-                ExpressionNode eN = new ExpressionNode(tok);
 
-
-                if (tok.current().token() == Token.RIGHT_PAREN) {
+                if (tok.current().token() == Token.LEFT_PAREN) {
                     //terminal node
                     System.out.println(tok.current());
-                } else {
-                    throw new TokenizerException(TOKENIZERMESSAGE);
+                    tok.moveNext();
+                    System.out.println(tok.current() + " inside left paren if");
+                    ExpressionNode eN = new ExpressionNode(tok);
+                    System.out.println(tok.current() + " inside left paren if");
+
+                    if (tok.current().token() == Token.RIGHT_PAREN) {
+                        //terminal node
+                        System.out.println(tok.current());
+                    } else {
+                        throw new TokenizerException(TOKENIZERMESSAGE);
+                    }
                 }
+                tok.moveNext();
+                System.out.println(tok.current() + " Factor end of factor");
             }
-            tok.moveNext();
         }
 
         @Override
