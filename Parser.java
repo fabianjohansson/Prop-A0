@@ -122,8 +122,8 @@ public class Parser implements IParser {
                 if (tok.current().token() == Token.ASSIGN_OP) {
                     System.out.println(tok.current());
                     tok.moveNext();
-
                     eN = new ExpressionNode(tok);
+
                     if (tok.current().token() == Token.SEMICOLON) {
                         System.out.println(tok.current());
                         tok.moveNext();
