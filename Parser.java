@@ -49,7 +49,6 @@ public class Parser implements IParser {
     private class BlockNode implements INode {
 
         private StatementsNode s = null;
-        private int level =0;
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
             System.out.println("BlockNode ");
@@ -81,8 +80,7 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            
-        s.buildString(builder, level);
+
 
             //recursive genom alla
         }
