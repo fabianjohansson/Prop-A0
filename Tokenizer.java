@@ -89,7 +89,7 @@ public class Tokenizer implements ITokenizer {
         if (VALID_SYMBOLS.containsKey(ch)) {
             scanner.moveNext();
             return new Lexeme(ch, VALID_SYMBOLS.get(ch));
-        } else if (Character.isLetter(ch)) {
+        } else if (Character.isLetter(ch) && Character.isLowerCase(ch)) {
             StringBuilder builder = new StringBuilder();
             while (Character.isLetter(scanner.current())) {
                 builder.append(scanner.current());
