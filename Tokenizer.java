@@ -46,8 +46,7 @@ public class Tokenizer implements ITokenizer {
         scanner = new Scanner();
         scanner.open(fileName);
         scanner.moveNext();
-
-        // next = extractLexeme();
+        next = extractLexeme();
     }
 
 
@@ -58,18 +57,15 @@ public class Tokenizer implements ITokenizer {
 
     @Override
     public void moveNext() throws IOException, TokenizerException {
-        System.out.println("test5");
+
         if (scanner == null) {
             throw new IOException("no open file. ");
-
         }
-
         current = next;
-
         if (next.token() != Token.EOF) {
             next = extractLexeme();
         }
-        System.out.println("test6");
+
     }
 
     @Override
@@ -91,6 +87,7 @@ public class Tokenizer implements ITokenizer {
 
         char ch = scanner.current();
         if (VALID_SYMBOLS.containsKey(ch)) {
+            scanner.moveNext();
             return new Lexeme(ch, VALID_SYMBOLS.get(ch));
         } else if (Character.isLetter(ch)) {
             StringBuilder builder = new StringBuilder();
