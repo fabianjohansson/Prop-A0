@@ -60,13 +60,13 @@ public class Parser implements IParser {
 
                 if (tok.current().token() == Token.RIGHT_CURLY) {
                     tok.moveNext();
-                    if(tok.current().token() != Token.EOF){
+                    if (tok.current().token() != Token.EOF) {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
-                }else{
+                } else {
                     throw new TokenizerException(TOKENIZERMESSAGE);
                 }
-            }else{
+            } else {
                 throw new TokenizerException(TOKENIZERMESSAGE);
             }
         }
@@ -97,7 +97,7 @@ public class Parser implements IParser {
             if (tok.current().token() == Token.IDENT) {
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
-            }else{
+            } else {
                 throw new TokenizerException(TOKENIZERMESSAGE);
             }
         }
@@ -128,10 +128,10 @@ public class Parser implements IParser {
         public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
             System.out.println("AssignmentNode");
             if (tok.current().token() == Token.IDENT) {
-                System.out.println(tok.current());
+                System.out.println(tok.current() + "ASSIGN");
                 tok.moveNext();
                 if (tok.current().token() == Token.ASSIGN_OP) {
-                    System.out.println(tok.current());
+                    System.out.println(tok.current() + " ASSIGN");
                     tok.moveNext();
 
                     eN = new ExpressionNode(tok);
@@ -139,7 +139,7 @@ public class Parser implements IParser {
                         System.out.println(tok.current());
                         tok.moveNext();
 
-                    }else{
+                    } else {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
                 } else {
@@ -165,16 +165,23 @@ public class Parser implements IParser {
 
     private class ExpressionNode implements INode {
 
-        TermNode tM = null;
+        private TermNode tM = null;
 
-        public ExpressionNode(Tokenizer tok) {
+        public ExpressionNode(Tokenizer tok) throws TokenizerException, IOException {
 
-            if (tok.current().token() == Token.IDENT | tok.current().token() == Token.INT_LIT |
-                    tok.current().token() == Token.LEFT_PAREN) {
-                System.out.println(tok.current());
-                tM = new TermNode();
+            if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
+                    || tok.current().token() == Token.LEFT_PAREN) {
+                System.out.println(tok.current() + " EXPR inside if tok = term");
+                tM = new TermNode(tok);
+                if (tok.current().token() == Token.ADD_OP || tok.current().token() == Token.SUB_OP) {
+                    //terminal nodes
+                    System.out.println(tok.current() + " EXPR if sub/add");
+                    tok.moveNext();
+                    ExpressionNode eN = new ExpressionNode(tok);
+                } else {
+                    throw new TokenizerException(TOKENIZERMESSAGE);
+                }
             }
-
 
         }
 
@@ -191,6 +198,25 @@ public class Parser implements IParser {
 
     private class TermNode implements INode {
 
+        private FactorNode fN = null;
+
+        public TermNode(Tokenizer tok) throws IOException, TokenizerException {
+
+            if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
+                    || tok.current().token() == Token.LEFT_PAREN) {
+                System.out.println(tok.current() + " Term inside if a term");
+                fN = new FactorNode(tok);
+
+
+                if (tok.current().token() == Token.MULT_OP || tok.current().token() == Token.DIV_OP) {
+                    //terminal node
+                    System.out.println(tok.current() + " Term");
+                    tok.moveNext();
+                    TermNode tM = new TermNode(tok);
+                }
+            }
+        }
+
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;
@@ -203,6 +229,30 @@ public class Parser implements IParser {
     }
 
     private class FactorNode implements INode {
+
+
+        public FactorNode(Tokenizer tok) throws IOException, TokenizerException {
+
+            //terminal node
+            System.out.println(tok.current() + " Factor ?");
+
+            if (tok.current().token() == Token.LEFT_PAREN) {
+                //terminal node
+                System.out.println(tok.current());
+                tok.moveNext();
+                System.out.println(tok.current() + " inside left paren if");
+                ExpressionNode eN = new ExpressionNode(tok);
+
+
+                if (tok.current().token() == Token.RIGHT_PAREN) {
+                    //terminal node
+                    System.out.println(tok.current());
+                } else {
+                    throw new TokenizerException(TOKENIZERMESSAGE);
+                }
+            }
+            tok.moveNext();
+        }
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
