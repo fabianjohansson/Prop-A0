@@ -17,11 +17,17 @@ public class Program {
 			try {
 				if (args.length < 0)
 					throw new Exception("Incorrect number of parameters to program.");
+
 				inputFileName = "C:\\Users\\fabian\\Desktop\\Plugg\\HT 2019\\PROP\\Prop-A0\\program2.txt";
+				//outputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\out.txt";
+
+				// inputFileName = args[0];
 				//outputFileName = args[1];
 
 				parser = new Parser();
+				System.out.println("test1");
 				parser.open(inputFileName);
+				System.out.println("test2");
 				root = parser.parse();
 				builder = new StringBuilder();
 				builder.append("PARSE TREE:\n");

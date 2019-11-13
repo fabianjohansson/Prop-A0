@@ -1,10 +1,8 @@
 import java.io.IOException;
 
 /**
- *
- *
- *                                          TODO!
- *
+ * TODO!
+ * <p>
  * ID Node behövs, lika som noun Node existerar i exempel.
  * Int Node behövs, lika som verb Node existerar i exempel.
  */
@@ -16,8 +14,11 @@ public class Parser implements IParser {
     public void open(String fileName) throws IOException, TokenizerException {
 
         tokenizer = new Tokenizer();
+        System.out.println("tes3");
         tokenizer.open(fileName);
+        System.out.println("test4");
         tokenizer.moveNext();
+        System.out.println("test5");
     }
 
     @Override
@@ -40,25 +41,26 @@ public class Parser implements IParser {
     }
 
     /**
-     *
      * la till if tok inte null eftersom ett blockstatement enligt grammatiken kan repeteras oändligt antal gånger
      * men äve noll gånger så är det teoretiskt möjligt att vi får en lexeme som är null.
-     *
+     * <p>
      * ändrade ifrån private inode s till private statementsnode s = null //inode är ett interface varför ska vi skapa det?
      * ädrade från private blockode bn till priavte blocknode bn = null
-     *
      */
     private class BlockNode implements INode {
 
         private StatementsNode s = null;
-        private BlockNode bN = null;
 
-        public BlockNode(Tokenizer tok) {
-            if (tok != null) {
+
+        public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
+            System.out.println("BlockNode" );
+            if (tok.current().token() == Token.LEFT_CURLY) {
+                System.out.println(tok.current());
+                tok.moveNext();
                 s = new StatementsNode(tok);
-                if (tok.current().token() != Token.EOF) {
-                    bN = new BlockNode(tok);
-                }
+
+            }else if( tok.current().token() == Token.RIGHT_CURLY) {
+                tok.moveNext();
             }
         }
 
@@ -75,23 +77,22 @@ public class Parser implements IParser {
     }
 
     /**
-     *
      * eftersom ett statement kan innehålla ett en assign och en statement, eller inget måste detta hanteras.
      * men eftesom det kommer från blockstatement bara om det inte är null är det redan hanterat.
-     *
-     *
-     *
      */
     private class StatementsNode implements INode {
 
         private AssignmentNode aN = null;
         private StatementsNode sN = null;
 
-        public StatementsNode(Tokenizer tok){
+        public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
 
-            aN = new AssignmentNode(tok);
-            sN = new StatementsNode(tok);
+            if (tok.current().token() == Token.IDENT){
+                aN = new AssignmentNode(tok);
+                sN = new StatementsNode(tok);
             }
+        }
+
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;
@@ -107,28 +108,37 @@ public class Parser implements IParser {
      * Eftersom ett assignment består av ett ID ett = ett EXPR och ett ;
      * eftersom  = och ; är slut så sparar vi dom i Lex om dom stämmer
      * sen går vi vidare
-     *
+     * <p>
      * kan behövas en else sats för att gå vidare.
-     *
-     *
-     *
      */
     private class AssignmentNode implements INode {
 
         private ExpressionNode eN = null;
-        private IDNode iN = null;
-        Lexeme lex = null;
 
-        public AssignmentNode (Tokenizer tok){
 
-            if (tok.current().token().equals('=')){
-                lex = tok.current();
-            }else if (tok.current().token().equals(';')){
-                lex = tok.current();
+        public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
+
+            if (tok.current().token() == Token.IDENT) {
+                tok.moveNext();
+
+                if (tok.current().token() == Token.ASSIGN_OP) {
+                    tok.moveNext();
+
+                    //eN = new ExpressionNode(tok);
+                    if (tok.current().token() == Token.SEMICOLON) {
+                        tok.moveNext();
+
+                    }
+                } else {
+                    throw new TokenizerException("Invalid Symbol");
+
+                }
+            }else {
+                throw new TokenizerException("Invalid Symbol");
             }
-                //eN = new ExpressionNode(tok);
-                //iN = new IDNode(tok);
+
         }
+
         @Override
         public Object evaluate(Object[] args) throws Exception {
             return null;
@@ -167,20 +177,6 @@ public class Parser implements IParser {
     }
 
     private class FactorNode implements INode {
-
-        @Override
-        public Object evaluate(Object[] args) throws Exception {
-            return null;
-        }
-
-        @Override
-        public void buildString(StringBuilder builder, int tabs) {
-
-        }
-    }
-
-    private class IDNode implements INode{
-
 
         @Override
         public Object evaluate(Object[] args) throws Exception {

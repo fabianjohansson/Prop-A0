@@ -32,6 +32,9 @@ public class Tokenizer implements ITokenizer {
         VALID_SYMBOLS.put('-', Token.SUB_OP);
         VALID_SYMBOLS.put(';', Token.SEMICOLON);
         VALID_SYMBOLS.put(null, Token.NULL);
+        VALID_SYMBOLS.put('(', Token.LEFT_PAREN);
+        VALID_SYMBOLS.put(')', Token.RIGHT_PAREN);
+
     }
 
     public Tokenizer() {
@@ -55,13 +58,18 @@ public class Tokenizer implements ITokenizer {
 
     @Override
     public void moveNext() throws IOException, TokenizerException {
+        System.out.println("test5");
         if (scanner == null) {
             throw new IOException("no open file. ");
+
         }
+
         current = next;
+
         if (next.token() != Token.EOF) {
             next = extractLexeme();
         }
+        System.out.println("test6");
     }
 
     @Override
@@ -80,7 +88,7 @@ public class Tokenizer implements ITokenizer {
 
     private Lexeme extractLexeme() throws TokenizerException, IOException {
         consumeWhiteSpaces();
-        
+
         char ch = scanner.current();
         if (VALID_SYMBOLS.containsKey(ch)) {
             return new Lexeme(ch, VALID_SYMBOLS.get(ch));
