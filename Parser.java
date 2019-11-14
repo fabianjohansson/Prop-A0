@@ -47,7 +47,7 @@ public class Parser implements IParser {
      * ädrade från private blockode bn till priavte blocknode bn = null
      */
     private class BlockNode implements INode {
-
+        private Lexeme lex;
         private StatementsNode s = null;
         StringBuilder outBuilder = new StringBuilder();
         private int level =0;
