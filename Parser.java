@@ -49,18 +49,26 @@ public class Parser implements IParser {
     private class BlockNode implements INode {
 
         private StatementsNode s = null;
+        StringBuilder outBuilder = new StringBuilder();
+        private int level =0;
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
             System.out.println("BlockNode ");
             if (tok.current().token() == Token.LEFT_CURLY) {
                 System.out.println(tok.current());
+                lex = tok.current();
+                //outBuilder.append(lex.toString());
+                buildString(outBuilder,0);
                 tok.moveNext();
                 s = new StatementsNode(tok);
                 System.out.println("are wer here?");
                 System.out.println(tok.current());
                 if (tok.current().token() == Token.RIGHT_CURLY) {
                     System.out.println(tok.current());
+                    lex = tok.current();
+                    buildString(outBuilder,0);
                     tok.moveNext();
+                   // outBuilder.append(lex.toString());
                     if (tok.current().token() != Token.EOF) {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
@@ -80,7 +88,8 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-
+            
+        builder.append("TEST TEST TEST TEST " + "\r\n" + lex);
 
             //recursive genom alla
         }
