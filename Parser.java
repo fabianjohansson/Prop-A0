@@ -88,8 +88,9 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            
-        builder.append("TEST TEST TEST TEST " + "\r\n" + lex);
+            builder.append("BlockNode" + "\r\n");
+            builder.append(lex + "\r\n");
+            builder.append("TEST TEST TEST TEST " + "\r\n" + lex);
 
             //recursive genom alla
         }
