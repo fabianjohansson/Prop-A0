@@ -64,11 +64,16 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("BlockNode" + "\r\n");
-            builder.append(leftCurly + "\r\n");
+
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+            builder.append(padding + "BlockNode" + "\r\n");
+            builder.append(padding + leftCurly + "\r\n");
             tabs++;
             s.buildString(builder, tabs);
-            builder.append(rightCurly + "\r\n");
+            builder.append(padding + rightCurly + "\r\n");
         }
     }
 
@@ -93,7 +98,11 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("StatementNode" + "\r\n");
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+            builder.append(padding + "StatementNode" + "\r\n");
             tabs++;
             if (lex != null) {
                 aN.buildString(builder, tabs);
@@ -140,12 +149,17 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("AssignmentNode" + "\r\n");
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+
+            builder.append(padding + "AssignmentNode" + "\r\n");
             tabs++;
-            builder.append(identifier + "\r\n");
-            builder.append(assign + "\r\n");
+            builder.append(padding + identifier + "\r\n");
+            builder.append(padding + assign + "\r\n");
             eN.buildString(builder, tabs);
-            builder.append(semiColon + "\r\n");
+            builder.append(padding + semiColon + "\r\n");
         }
     }
 
@@ -177,11 +191,15 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("ExpressionNode" + "\r\n");
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+            builder.append(padding + "ExpressionNode" + "\r\n");
             tabs++;
             tM.buildString(builder, tabs);
             if (addOrSub != null) {
-                builder.append(addOrSub + "\r\n");
+                builder.append(padding + addOrSub + "\r\n");
                 eN.buildString(builder, tabs);
             }
         }
@@ -217,11 +235,16 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("TermNode" + "\r\n");
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+
+            builder.append(padding + "TermNode" + "\r\n");
             tabs++;
             fN.buildString(builder, tabs);
             if (multOrDiv != null) {
-                builder.append(multOrDiv + "\r\n");
+                builder.append(padding + multOrDiv + "\r\n");
                 if (tM != null) {
                     tM.buildString(builder, tabs);
                 }
@@ -262,12 +285,16 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("FactorNode" + "\r\n");
+            String padding = "";
+            for(int u = 0; u < tabs; u++){
+                padding += "\t";
+            }
+            builder.append(padding + "FactorNode" + "\r\n");
             tabs++;
-            builder.append(firstLex + "\r\n");
+            builder.append(padding + firstLex + "\r\n");
             if (firstLex.token() == Token.LEFT_PAREN) {
                 eN.buildString(builder, tabs);
-                builder.append(rightParen + "\r\n");
+                builder.append(padding + rightParen + "\r\n");
             }
         }
     }
