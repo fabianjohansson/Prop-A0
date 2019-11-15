@@ -153,9 +153,9 @@ public class Parser implements IParser {
             for(int u = 0; u < tabs; u++){
                 padding += "\t";
             }
-
             builder.append(padding + "AssignmentNode" + "\r\n");
             tabs++;
+            padding += "\t";
             builder.append(padding + identifier + "\r\n");
             builder.append(padding + assign + "\r\n");
             eN.buildString(builder, tabs);
@@ -197,6 +197,7 @@ public class Parser implements IParser {
             }
             builder.append(padding + "ExpressionNode" + "\r\n");
             tabs++;
+            padding += "\t";
             tM.buildString(builder, tabs);
             if (addOrSub != null) {
                 builder.append(padding + addOrSub + "\r\n");
@@ -242,6 +243,7 @@ public class Parser implements IParser {
 
             builder.append(padding + "TermNode" + "\r\n");
             tabs++;
+            padding += "\t";
             fN.buildString(builder, tabs);
             if (multOrDiv != null) {
                 builder.append(padding + multOrDiv + "\r\n");
@@ -291,6 +293,7 @@ public class Parser implements IParser {
             }
             builder.append(padding + "FactorNode" + "\r\n");
             tabs++;
+            padding += "\t";
             builder.append(padding + firstLex + "\r\n");
             if (firstLex.token() == Token.LEFT_PAREN) {
                 eN.buildString(builder, tabs);
