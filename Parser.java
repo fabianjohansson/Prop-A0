@@ -1,11 +1,7 @@
 import java.io.IOException;
+import java.util.Stack;
 
-/**
- * TODO!
- * <p>
- * ID Node behövs, lika som noun Node existerar i exempel.
- * Int Node behövs, lika som verb Node existerar i exempel.
- */
+
 public class Parser implements IParser {
 
     private static final String TOKENIZERMESSAGE = "Invalid Symbol";
@@ -39,39 +35,21 @@ public class Parser implements IParser {
         }
     }
 
-    /**
-     * la till if tok inte null eftersom ett blockstatement enligt grammatiken kan repeteras oändligt antal gånger
-     * men äve noll gånger så är det teoretiskt möjligt att vi får en lexeme som är null.
-     * <p>
-     * ändrade ifrån private inode s till private statementsnode s = null //inode är ett interface varför ska vi skapa det?
-     * ädrade från private blockode bn till priavte blocknode bn = null
-     */
     private class BlockNode implements INode {
-        private Lexeme lex = null;
-       // private StringBuilder outBuilder = null;
-        private String all = "";
-        private StatementsNode s = null;
+        private Lexeme leftCurly, rightCurly;
+        private StatementsNode s;
 
         public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
-            System.out.println("BlockNode ");
             if (tok.current().token() == Token.LEFT_CURLY) {
-                System.out.println(tok.current());
-                all += tok.current().toString();
-                //buildString(outBuilder, 0);
+                leftCurly = tok.current();
                 tok.moveNext();
                 s = new StatementsNode(tok);
-                System.out.println("are wer here?");
-                System.out.println(tok.current());
                 if (tok.current().token() == Token.RIGHT_CURLY) {
-                    System.out.println(tok.current());
-                    //lex = tok.current();
-                    //buildString(outBuilder,1);
-                    all += tok.current().toString();
+                    rightCurly = tok.current();
                     tok.moveNext();
                     if (tok.current().token() != Token.EOF) {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
-                    System.out.println(tok.current());
                 } else {
                     throw new TokenizerException(TOKENIZERMESSAGE);
                 }
@@ -82,78 +60,69 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            return null;
+            return this.leftCurly;
         }
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            /*outBuilder.append("BlockNode /n" + lex.toString());
-            System.out.println("Från buildString metod " + outBuilder.toString());
-            buildString(outBuilder,+1);*/
-            builder.append("BlockNode " + all);
-            //recursive genom alla
+
+            builder.append("\t".repeat(tabs) + "BlockNode" + "\r\n");
+            builder.append("\t".repeat(tabs) + leftCurly + "\r\n");
+            tabs++;
+            s.buildString(builder, tabs);
+            tabs--;
+            builder.append("\t".repeat(tabs) + rightCurly + "\r\n");
         }
     }
 
-    /**
-     * eftersom ett statement kan innehålla ett en assign och en statement, eller inget måste detta hanteras.
-     * men eftesom det kommer från blockstatement bara om det inte är null är det redan hanterat.
-     */
     private class StatementsNode implements INode {
 
         private AssignmentNode aN = null;
         private StatementsNode sN = null;
-        private String allStatements = "";
+        private Lexeme lex = null;
 
         public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
-            //allStatements += " StatementNode ";
-            System.out.println("StatementNode ");
             if (tok.current().token() == Token.IDENT) {
-
+                lex = tok.current();
                 aN = new AssignmentNode(tok);
                 sN = new StatementsNode(tok);
             }
-            System.out.println(tok.current());
-
         }
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
+
             return null;
         }
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append(allStatements);
+
+            builder.append("\t".repeat(tabs) + "StatementNode" + "\r\n");
+            tabs++;
+            if (lex != null) {
+                aN.buildString(builder, tabs);
+                sN.buildString(builder, tabs);
+            }
         }
     }
 
-    /**
-     * Eftersom ett assignment består av ett ID ett = ett EXPR och ett ;
-     * eftersom  = och ; är slut så sparar vi dom i Lex om dom stämmer
-     * sen går vi vidare
-     * <p>
-     * kan behövas en else sats för att gå vidare.
-     */
     private class AssignmentNode implements INode {
 
-        private ExpressionNode eN = null;
-        private String expString = "";
-
+        private ExpressionNode eN;
+        private Lexeme identifier, assign, semiColon;
 
         public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
-            System.out.println("AssignmentNode ");
             if (tok.current().token() == Token.IDENT) {
-                System.out.println(tok.current() + " ASSIGN");
-                expString += tok.current();
+                identifier = tok.current();
                 tok.moveNext();
                 if (tok.current().token() == Token.ASSIGN_OP) {
-                    System.out.println(tok.current() + " ASSIGN");
+                    assign = tok.current();
                     tok.moveNext();
 
                     eN = new ExpressionNode(tok);
                     if (tok.current().token() == Token.SEMICOLON) {
-                        System.out.println(tok.current() + "end end end");
+                        semiColon = tok.current();
                         tok.moveNext();
 
                     } else {
@@ -176,28 +145,34 @@ public class Parser implements IParser {
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
-            builder.append("ExpressionNode " + expString);
+
+            builder.append("\t".repeat(tabs) + "AssignmentNode" + "\r\n");
+            tabs++;
+
+            builder.append("\t".repeat(tabs) + identifier + "\r\n");
+            builder.append("\t".repeat(tabs) + assign + "\r\n");
+            eN.buildString(builder, tabs);
+            builder.append("\t".repeat(tabs) + semiColon + "\r\n");
         }
     }
 
     private class ExpressionNode implements INode {
-
-        private TermNode tM = null;
+        private ExpressionNode eN = null;
+        private TermNode tM;
+        private Lexeme addOrSub;
 
         public ExpressionNode(Tokenizer tok) throws TokenizerException, IOException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                System.out.println(tok.current() + " EXPR inside if tok = term");
                 tM = new TermNode(tok);
-                System.out.println("error here");
                 if (tok.current().token() == Token.ADD_OP || tok.current().token() == Token.SUB_OP) {
-                    //terminal nodes
-                    System.out.println(tok.current() + " EXPR if sub/add");
+                    addOrSub = tok.current();
                     tok.moveNext();
-                    ExpressionNode eN = new ExpressionNode(tok);
-                    System.out.println("backinside expr");
+                    eN = new ExpressionNode(tok);
                 }
+            } else {
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
 
         }
@@ -210,30 +185,40 @@ public class Parser implements IParser {
         @Override
         public void buildString(StringBuilder builder, int tabs) {
 
+            builder.append("\t".repeat(tabs) + "ExpressionNode" + "\r\n");
+            tabs++;
+
+            tM.buildString(builder, tabs);
+            if (addOrSub != null) {
+                builder.append("\t".repeat(tabs) + addOrSub + "\r\n");
+                eN.buildString(builder, tabs);
+            }
         }
     }
 
     private class TermNode implements INode {
 
-        private FactorNode fN = null;
+        private FactorNode fN;
+        private TermNode tM = null;
+        private Lexeme multOrDiv;
 
         public TermNode(Tokenizer tok) throws IOException, TokenizerException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                System.out.println(tok.current() + " Term inside if a term");
+                ;
                 fN = new FactorNode(tok);
 
 
                 if (tok.current().token() == Token.MULT_OP || tok.current().token() == Token.DIV_OP) {
-                    //terminal node
-                    System.out.println(tok.current() + " Term");
+                    multOrDiv = tok.current();
+                    ;
                     tok.moveNext();
-                    TermNode tM = new TermNode(tok);
+                    tM = new TermNode(tok);
                 }
-                System.out.println("Closing if mul/div");
+            } else {
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
-            System.out.println("closing term");
         }
 
         @Override
@@ -244,38 +229,41 @@ public class Parser implements IParser {
         @Override
         public void buildString(StringBuilder builder, int tabs) {
 
+            builder.append("\t".repeat(tabs) + "TermNode" + "\r\n");
+            tabs++;
+            fN.buildString(builder, tabs);
+            if (multOrDiv != null) {
+                builder.append("\t".repeat(tabs) + multOrDiv + "\r\n");
+                if (tM != null) {
+                    tM.buildString(builder, tabs);
+                }
+            }
         }
     }
 
     private class FactorNode implements INode {
-
+        private Lexeme firstLex, rightParen;
+        private ExpressionNode eN = null;
 
         public FactorNode(Tokenizer tok) throws IOException, TokenizerException {
 
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                System.out.println(tok.current() + " Factor inside if a Factor");
-
-                //terminal node
+                firstLex = tok.current();
 
                 if (tok.current().token() == Token.LEFT_PAREN) {
-                    //terminal node
-                    System.out.println(tok.current());
                     tok.moveNext();
-                    System.out.println(tok.current() + " inside left paren if");
-                    ExpressionNode eN = new ExpressionNode(tok);
-                    System.out.println(tok.current() + " inside left paren if");
-
+                    eN = new ExpressionNode(tok);
                     if (tok.current().token() == Token.RIGHT_PAREN) {
-                        //terminal node
-                        System.out.println(tok.current());
+                        rightParen = tok.current();
                     } else {
                         throw new TokenizerException(TOKENIZERMESSAGE);
                     }
                 }
                 tok.moveNext();
-                System.out.println(tok.current() + " Factor end of factor");
+            } else {
+                throw new TokenizerException(TOKENIZERMESSAGE);
             }
         }
 
@@ -287,6 +275,13 @@ public class Parser implements IParser {
         @Override
         public void buildString(StringBuilder builder, int tabs) {
 
+            builder.append("\t".repeat(tabs) + "FactorNode" + "\r\n");
+            tabs++;
+            builder.append("\t".repeat(tabs) + firstLex + "\r\n");
+            if (firstLex.token() == Token.LEFT_PAREN) {
+                eN.buildString(builder, tabs);
+                builder.append("\t".repeat(tabs) + rightParen + "\r\n");
+            }
         }
     }
 }
