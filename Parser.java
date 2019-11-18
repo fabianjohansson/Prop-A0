@@ -207,8 +207,8 @@ public class Parser implements IParser {
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
                 ;
-                fN = new FactorNode(tok);
 
+                fN = new FactorNode(tok);
 
                 if (tok.current().token() == Token.MULT_OP || tok.current().token() == Token.DIV_OP) {
                     multOrDiv = tok.current();
