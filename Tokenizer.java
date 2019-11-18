@@ -104,10 +104,10 @@ public class Tokenizer implements ITokenizer {
                 scanner.moveNext();
             }
             String value = builder.toString();
-            //double doubleValue = Integer.parseInt(value);
-            return new Lexeme(value, Token.INT_LIT);
+            double doubleValue = Integer.parseInt(value);
+            return new Lexeme(doubleValue, Token.INT_LIT);
         } else {
-            throw new TokenizerException("invalid character" + ch);
+            throw new TokenizerException("invalid character " + ch);
         }
     }
 }

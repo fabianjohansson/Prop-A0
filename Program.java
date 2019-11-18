@@ -18,7 +18,7 @@ public class Program {
 				if (args.length < 0)
 					throw new Exception("Incorrect number of parameters to program.");
 
-				inputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\parsetree2.txt";
+				inputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\program2.txt";
 				outputFileName = "C:\\Users\\Michel\\IdeaProjects\\Prop-A0\\out.txt";
 
 				//inputFileName = args[0];
