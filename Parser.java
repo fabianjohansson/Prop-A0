@@ -4,7 +4,7 @@ import java.util.Stack;
 
 public class Parser implements IParser {
 
-    private static final String TOKENIZERMESSAGE = "Invalid Symbol";
+    private static final String PARSE_EXCEPTION_MESSAGE = "Invalid Symbol";
     private Tokenizer tokenizer = null;
 
     @Override
@@ -39,7 +39,7 @@ public class Parser implements IParser {
         private Lexeme leftCurly, rightCurly;
         private StatementsNode s;
 
-        public BlockNode(Tokenizer tok) throws IOException, TokenizerException {
+        public BlockNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
             if (tok.current().token() == Token.LEFT_CURLY) {
                 leftCurly = tok.current();
                 tok.moveNext();
@@ -48,13 +48,13 @@ public class Parser implements IParser {
                     rightCurly = tok.current();
                     tok.moveNext();
                     if (tok.current().token() != Token.EOF) {
-                        throw new TokenizerException(TOKENIZERMESSAGE);
+                        throw new ParserException(PARSE_EXCEPTION_MESSAGE);
                     }
                 } else {
-                    throw new TokenizerException(TOKENIZERMESSAGE);
+                    throw new ParserException(PARSE_EXCEPTION_MESSAGE);
                 }
             } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
+                throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
         }
 
@@ -81,7 +81,7 @@ public class Parser implements IParser {
         private StatementsNode sN = null;
         private Lexeme lex = null;
 
-        public StatementsNode(Tokenizer tok) throws TokenizerException, IOException {
+        public StatementsNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
             if (tok.current().token() == Token.IDENT) {
                 lex = tok.current();
                 aN = new AssignmentNode(tok);
@@ -112,7 +112,7 @@ public class Parser implements IParser {
         private ExpressionNode eN;
         private Lexeme identifier, assign, semiColon;
 
-        public AssignmentNode(Tokenizer tok) throws TokenizerException, IOException {
+        public AssignmentNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
             if (tok.current().token() == Token.IDENT) {
                 identifier = tok.current();
                 tok.moveNext();
@@ -126,14 +126,14 @@ public class Parser implements IParser {
                         tok.moveNext();
 
                     } else {
-                        throw new TokenizerException(TOKENIZERMESSAGE);
+                        throw new ParserException(PARSE_EXCEPTION_MESSAGE);
                     }
                 } else {
-                    throw new TokenizerException(TOKENIZERMESSAGE);
+                    throw new ParserException(PARSE_EXCEPTION_MESSAGE);
 
                 }
             } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
+                throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
 
         }
@@ -161,7 +161,7 @@ public class Parser implements IParser {
         private TermNode tM;
         private Lexeme addOrSub;
 
-        public ExpressionNode(Tokenizer tok) throws TokenizerException, IOException {
+        public ExpressionNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
@@ -172,7 +172,7 @@ public class Parser implements IParser {
                     eN = new ExpressionNode(tok);
                 }
             } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
+                throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
 
         }
@@ -202,7 +202,7 @@ public class Parser implements IParser {
         private TermNode tM = null;
         private Lexeme multOrDiv;
 
-        public TermNode(Tokenizer tok) throws IOException, TokenizerException {
+        public TermNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
@@ -217,7 +217,7 @@ public class Parser implements IParser {
                     tM = new TermNode(tok);
                 }
             } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
+                throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
         }
 
@@ -245,7 +245,7 @@ public class Parser implements IParser {
         private Lexeme firstLex, rightParen;
         private ExpressionNode eN = null;
 
-        public FactorNode(Tokenizer tok) throws IOException, TokenizerException {
+        public FactorNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
 
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
@@ -258,12 +258,12 @@ public class Parser implements IParser {
                     if (tok.current().token() == Token.RIGHT_PAREN) {
                         rightParen = tok.current();
                     } else {
-                        throw new TokenizerException(TOKENIZERMESSAGE);
+                        throw new ParserException(PARSE_EXCEPTION_MESSAGE);
                     }
                 }
                 tok.moveNext();
             } else {
-                throw new TokenizerException(TOKENIZERMESSAGE);
+                throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
         }
 
