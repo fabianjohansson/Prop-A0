@@ -237,6 +237,7 @@ public class Parser implements IParser {
 
             builder.append("\t".repeat(tabs) + "ExpressionNode" + "\r\n");
             tabs++;
+
             tM.buildString(builder, tabs);
             if (addOrSub != null) {
                 builder.append("\t".repeat(tabs) + addOrSub + "\r\n");
@@ -300,7 +301,6 @@ public class Parser implements IParser {
 
     private class FactorNode implements INode {
         private Lexeme firstLex, rightParen;
-
         private ExpressionNode eN = null;
 
         public FactorNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
