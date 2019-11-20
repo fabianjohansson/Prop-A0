@@ -1,5 +1,8 @@
 import java.io.IOException;
-import java.util.Stack;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 
 public class Parser implements IParser {
@@ -60,7 +63,24 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            return this.leftCurly;
+            ArrayList<Object> varList = new ArrayList<>();
+            Object[] objects;
+            objects = varList.toArray();
+            String answer = "";
+            if (s != null) { ;
+                Object a = s.evaluate(objects);
+                varList = (ArrayList)a;
+                for (Object o : varList){
+                    if( o instanceof EvaluatedStatement ){
+                        EvaluatedStatement ev = (EvaluatedStatement)o;
+                        answer = ev.getID() + " = " + ev.getValue();
+                        answer += " = " + ev.getValue();
+                    }
+                }
+            } else {
+
+                answer = " \n";
+            }return answer;
         }
 
         @Override
@@ -81,6 +101,7 @@ public class Parser implements IParser {
         private StatementsNode sN = null;
         private Lexeme lex = null;
 
+
         public StatementsNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
             if (tok.current().token() == Token.IDENT) {
                 lex = tok.current();
@@ -91,8 +112,17 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
+            ArrayList<Object> varList = new ArrayList<>(Arrays.asList(args));
+            Object[] objects;
+            objects = varList.toArray();
+            if (lex != null) {
+                aN.evaluate(objects);
 
-            return null;
+                sN.evaluate(objects); // det andra statementet som ska byggas.
+                return varList;
+            } else {
+                return varList;
+            }
         }
 
         @Override
@@ -119,28 +149,34 @@ public class Parser implements IParser {
                 if (tok.current().token() == Token.ASSIGN_OP) {
                     assign = tok.current();
                     tok.moveNext();
-
                     eN = new ExpressionNode(tok);
                     if (tok.current().token() == Token.SEMICOLON) {
                         semiColon = tok.current();
                         tok.moveNext();
-
                     } else {
                         throw new ParserException(PARSE_EXCEPTION_MESSAGE);
                     }
                 } else {
                     throw new ParserException(PARSE_EXCEPTION_MESSAGE);
-
                 }
             } else {
                 throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
-
         }
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            return null;
+            ArrayList<Object> varList = new ArrayList<>(Arrays.asList(args));
+            Object o = identifier.value();
+            String s = (String)o;
+            EvaluatedStatement es = new EvaluatedStatement(s);
+            varList.add(es);
+            Object[] objects;
+            objects = varList.toArray();
+            Object a = eN.evaluate(objects);
+            varList = (ArrayList)a;
+
+            return varList;
         }
 
         @Override
@@ -148,7 +184,6 @@ public class Parser implements IParser {
 
             builder.append("\t".repeat(tabs) + "AssignmentNode" + "\r\n");
             tabs++;
-
             builder.append("\t".repeat(tabs) + identifier + "\r\n");
             builder.append("\t".repeat(tabs) + assign + "\r\n");
             eN.buildString(builder, tabs);
@@ -174,12 +209,29 @@ public class Parser implements IParser {
             } else {
                 throw new ParserException(PARSE_EXCEPTION_MESSAGE);
             }
-
         }
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            return null;
+
+            String completeStatement = "";
+            Object value, value2;
+            double d1;
+            value = tM.evaluate(null);
+            completeStatement += value + "";
+            if(addOrSub != null){
+                String s1 = null;
+                value2 = eN.evaluate(null);
+                s1 = value2.toString();
+                Character ch = s1.charAt(0);
+                if(Character.isLetter(ch)){
+                    completeStatement += addOrSub.value().toString() + " "+ s1;
+                }else if(Character.isDigit(ch)){
+                    d1 = Integer.parseInt(s1);
+                    completeStatement += addOrSub.value().toString() + " "+s1;
+                }
+            }
+            return completeStatement;
         }
 
         @Override
@@ -187,7 +239,6 @@ public class Parser implements IParser {
 
             builder.append("\t".repeat(tabs) + "ExpressionNode" + "\r\n");
             tabs++;
-
             tM.buildString(builder, tabs);
             if (addOrSub != null) {
                 builder.append("\t".repeat(tabs) + addOrSub + "\r\n");
@@ -206,13 +257,9 @@ public class Parser implements IParser {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                ;
-
                 fN = new FactorNode(tok);
-
                 if (tok.current().token() == Token.MULT_OP || tok.current().token() == Token.DIV_OP) {
                     multOrDiv = tok.current();
-                    ;
                     tok.moveNext();
                     tM = new TermNode(tok);
                 }
@@ -251,7 +298,6 @@ public class Parser implements IParser {
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
                 firstLex = tok.current();
-
                 if (tok.current().token() == Token.LEFT_PAREN) {
                     tok.moveNext();
                     eN = new ExpressionNode(tok);
