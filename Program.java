@@ -33,13 +33,14 @@ public class Program {
 				System.out.println(builder.toString());
 				builder.append("\nEVALUATION:\n");
 				builder.append(root.evaluate(null));
+				System.out.println(builder.toString());
 				
 				stream = new FileOutputStream(outputFileName);
 				writer = new OutputStreamWriter(stream);
 				writer.write(builder.toString());
 			}
 			catch (Exception exception) {
-				System.out.println("EXCEPTION: " + exception);
+				System.out.println("EXCEPTION : " + exception);
 			}
 			finally {
 				if (parser != null)
