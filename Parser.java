@@ -1,8 +1,4 @@
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 
 public class Parser implements IParser {
@@ -37,11 +33,12 @@ public class Parser implements IParser {
             tokenizer.close();
         }
     }
-    private class ResultNode{
+
+    private class ResultNode {
         private String id;
         private double currentValue;
 
-        public ResultNode(String id, double currentValue){
+        public ResultNode(String id, double currentValue) {
             this.id = id;
             this.currentValue = currentValue;
         }
@@ -49,7 +46,8 @@ public class Parser implements IParser {
         public double getCurrentValue() {
             return currentValue;
         }
-        public String getId(){
+
+        public String getId() {
             return id;
         }
     }
@@ -57,13 +55,13 @@ public class Parser implements IParser {
     private class BlockNode implements INode {
 
         private Lexeme leftCurly, rightCurly;
-        private StatementsNode s;
+        private StatementsNode statement;
 
         public BlockNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
             if (tok.current().token() == Token.LEFT_CURLY) {
                 leftCurly = tok.current();
                 tok.moveNext();
-                s = new StatementsNode(tok);
+                statement = new StatementsNode(tok);
                 if (tok.current().token() == Token.RIGHT_CURLY) {
                     rightCurly = tok.current();
                     tok.moveNext();
@@ -79,13 +77,12 @@ public class Parser implements IParser {
         }
 
 
-
         @Override
         public Object evaluate(Object[] args) throws Exception {
 
-            ResultNode[] evalArray = new ResultNode[500];
-            if(s != null) {
-                return s.evaluate(evalArray);
+            if (statement != null) {
+                ResultNode[] evalArray = new ResultNode[100];
+                return statement.evaluate(evalArray);
             }
             return null;
         }
@@ -96,7 +93,7 @@ public class Parser implements IParser {
             builder.append("\t".repeat(tabs) + "BlockNode" + "\r\n");
             builder.append("\t".repeat(tabs) + leftCurly + "\r\n");
             tabs++;
-            s.buildString(builder, tabs);
+            statement.buildString(builder, tabs);
             tabs--;
             builder.append("\t".repeat(tabs) + rightCurly + "\r\n");
         }
@@ -104,38 +101,45 @@ public class Parser implements IParser {
 
     private class StatementsNode implements INode {
 
-        private AssignmentNode aN = null;
-        private StatementsNode sN = null;
+        private AssignmentNode assign = null;
+        private StatementsNode statement = null;
         private Lexeme lex = null;
 
 
         public StatementsNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
             if (tok.current().token() == Token.IDENT) {
                 lex = tok.current();
-                aN = new AssignmentNode(tok);
-                sN = new StatementsNode(tok);
+                assign = new AssignmentNode(tok);
+                statement = new StatementsNode(tok);
             }
         }
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            StringBuilder sb = new StringBuilder();
 
-            if(aN != null){
-                ResultNode currentResult = (ResultNode) aN.evaluate(args);
-                sb.append(currentResult.getId() + "=" + currentResult.getCurrentValue() + "\n");
-                System.out.println("sb " + sb);
-                for(int i = 0; i < args.length; i++){
-                    if(args[i] == null){
+            StringBuilder sb = new StringBuilder();
+            if (assign != null) {
+                ResultNode currentResult = (ResultNode) assign.evaluate(args);
+                sb.append(currentResult.getId() + " = " + currentResult.getCurrentValue() + "\n");
+                System.out.println(sb);  //ta bort innan inlämmning
+
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] != null) {
+
+                        ResultNode curRes = (ResultNode) args[i];
+
+                    } else {
                         args[i] = currentResult;
-                        //breaks because array initialized to 300 in blockNode evaluation
                         break;
                     }
                 }
-                sb.append(sN.evaluate(args));
+
+
+                sb.append(statement.evaluate(args));
             }
             return sb;
         }
+
 
         @Override
         public void buildString(StringBuilder builder, int tabs) {
@@ -143,14 +147,14 @@ public class Parser implements IParser {
             builder.append("\t".repeat(tabs) + "StatementNode" + "\r\n");
             tabs++;
             if (lex != null) {
-                aN.buildString(builder, tabs);
-                sN.buildString(builder, tabs);
+                assign.buildString(builder, tabs);
+                statement.buildString(builder, tabs);
             }
         }
     }
 
     private class AssignmentNode implements INode {
-        private ExpressionNode eN;
+        private ExpressionNode expression;
         private Lexeme identifier, assign, semiColon;
 
         public AssignmentNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
@@ -160,7 +164,7 @@ public class Parser implements IParser {
                 if (tok.current().token() == Token.ASSIGN_OP) {
                     assign = tok.current();
                     tok.moveNext();
-                    eN = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok);
                     if (tok.current().token() == Token.SEMICOLON) {
                         semiColon = tok.current();
                         tok.moveNext();
@@ -177,10 +181,8 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            /*
-            * Behöver nog hantera semikolon här
-            * */
-                return new ResultNode(identifier.value().toString(), Double.parseDouble(eN.evaluate(args).toString()));
+
+            return new ResultNode(identifier.value().toString(), Double.parseDouble(expression.evaluate(args).toString()));
 
         }
 
@@ -191,25 +193,25 @@ public class Parser implements IParser {
             tabs++;
             builder.append("\t".repeat(tabs) + identifier + "\r\n");
             builder.append("\t".repeat(tabs) + assign + "\r\n");
-            eN.buildString(builder, tabs);
+            expression.buildString(builder, tabs);
             builder.append("\t".repeat(tabs) + semiColon + "\r\n");
         }
     }
 
     private class ExpressionNode implements INode {
-        private ExpressionNode eN = null;
-        private TermNode tM;
+        private ExpressionNode expression = null;
+        private TermNode term, prevOperator;
         private Lexeme addOrSub;
 
         public ExpressionNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                tM = new TermNode(tok);
+                term = new TermNode(tok);
                 if (tok.current().token() == Token.ADD_OP || tok.current().token() == Token.SUB_OP) {
                     addOrSub = tok.current();
                     tok.moveNext();
-                    eN = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok);
                 }
             } else {
                 throw new ParserException(PARSE_EXCEPTION_MESSAGE);
@@ -218,15 +220,18 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            double termNodeValue = Double.parseDouble(tM.evaluate(args).toString());
 
-            if(eN == null) {
+
+            Double termNodeValue = Double.parseDouble(term.evaluate(args).toString());
+
+            if (expression == null) {
                 return termNodeValue;
-            }else {
-                double exprNodeValue = Double.parseDouble(eN.evaluate(args).toString());
-                if (addOrSub.token() == Token.ADD_OP){
+            } else {
+                Double exprNodeValue = Double.parseDouble(expression.evaluate(args).toString());
+
+                if (addOrSub.token() == Token.ADD_OP) {
                     return termNodeValue + exprNodeValue;
-                }else{
+                } else {
                     return termNodeValue - exprNodeValue;
                 }
             }
@@ -238,29 +243,29 @@ public class Parser implements IParser {
             builder.append("\t".repeat(tabs) + "ExpressionNode" + "\r\n");
             tabs++;
 
-            tM.buildString(builder, tabs);
+            term.buildString(builder, tabs);
             if (addOrSub != null) {
                 builder.append("\t".repeat(tabs) + addOrSub + "\r\n");
-                eN.buildString(builder, tabs);
+                expression.buildString(builder, tabs);
             }
         }
     }
 
     private class TermNode implements INode {
-
-        private FactorNode fN;
-        private TermNode tM = null;
+        private Double prevDouble = 0.0;
+        private FactorNode factor;
+        private TermNode term = null;
         private Lexeme multOrDiv;
 
         public TermNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
-                fN = new FactorNode(tok);
+                factor = new FactorNode(tok);
                 if (tok.current().token() == Token.MULT_OP || tok.current().token() == Token.DIV_OP) {
                     multOrDiv = tok.current();
                     tok.moveNext();
-                    tM = new TermNode(tok);
+                    term = new TermNode(tok);
                 }
             } else {
                 throw new ParserException(PARSE_EXCEPTION_MESSAGE);
@@ -269,19 +274,46 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            double factorNodeValue = Double.parseDouble(fN.evaluate(args).toString());
+            Double factorNodeValue = Double.parseDouble(factor.evaluate(args).toString());
 
-            if (tM == null) {
+            if (term == null) {
                 return factorNodeValue;
-            }else {
-                double termNodeValue = Double.parseDouble(tM.evaluate(args).toString());
-                if (multOrDiv.token() == Token.MULT_OP){
-                    return factorNodeValue * termNodeValue;
-                }else {
-                    return factorNodeValue / termNodeValue;
+            } else {
+
+                if (multOrDiv.token() == Token.DIV_OP && prevDouble == 0.0) {
+                    if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
+                        term.setPrevDouble(factorNodeValue);
+                        return term.evaluate(args);
+                    } else {
+                        factorNodeValue = Double.parseDouble(factor.evaluate(args).toString());
+                    }
+                } else if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
+                    Double temp = prevDouble / factorNodeValue;
+                    term.setPrevDouble(temp);
+                    return term.evaluate(args);
+                } else {
+                    Double termValue = Double.parseDouble(term.evaluate(args).toString());
+                    return factorNodeValue * termValue;
                 }
+
+                /*
+                Double termValue;
+                if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
+                    Double secondTermFactor = Double.parseDouble(term.getFactor().evaluate(args).toString());
+                    factorNodeValue = factorNodeValue / secondTermFactor;
+                    termValue = Double.parseDouble(term.term.evaluate(args).toString());
+                } else {
+                    termValue = Double.parseDouble(term.evaluate(args).toString());
+                }
+                if (multOrDiv.token() == Token.MULT_OP) {
+                    return factorNodeValue * termValue;
+                } else {
+                    return factorNodeValue / termValue;
+
             }
 
+*/
+            }return factorNodeValue;
         }
 
         @Override
@@ -289,29 +321,36 @@ public class Parser implements IParser {
 
             builder.append("\t".repeat(tabs) + "TermNode" + "\r\n");
             tabs++;
-            fN.buildString(builder, tabs);
+            factor.buildString(builder, tabs);
             if (multOrDiv != null) {
                 builder.append("\t".repeat(tabs) + multOrDiv + "\r\n");
-                if (tM != null) {
-                    tM.buildString(builder, tabs);
+                if (term != null) {
+                    term.buildString(builder, tabs);
                 }
             }
+        }
+
+        public FactorNode getFactor() {
+            return factor;
+        }
+
+        public void setPrevDouble(double d) {
+            prevDouble = d;
         }
     }
 
     private class FactorNode implements INode {
         private Lexeme firstLex, rightParen;
-        private ExpressionNode eN = null;
+        private ExpressionNode expression = null;
 
         public FactorNode(Tokenizer tok) throws IOException, ParserException, TokenizerException {
-
 
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
                 firstLex = tok.current();
                 if (tok.current().token() == Token.LEFT_PAREN) {
                     tok.moveNext();
-                    eN = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok);
                     if (tok.current().token() == Token.RIGHT_PAREN) {
                         rightParen = tok.current();
                     } else {
@@ -326,21 +365,20 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
-            if (eN == null) {
+            if (expression == null) {
                 if (firstLex.token() == Token.INT_LIT) {
                     return firstLex.value();
                 } else if (firstLex.token() == Token.IDENT) {
                     for (int i = 0; i < args.length; i++) {
+
                         ResultNode resultNode = (ResultNode) args[i];
                         if (resultNode.getId().equals(firstLex.value().toString())) {
-                            return firstLex.value();
+                            return resultNode.getCurrentValue();
                         }
                     }
                 }
-
-
             }
-            return eN.evaluate(args);
+            return expression.evaluate(args);
         }
 
         @Override
@@ -350,7 +388,7 @@ public class Parser implements IParser {
             tabs++;
             builder.append("\t".repeat(tabs) + firstLex + "\r\n");
             if (firstLex.token() == Token.LEFT_PAREN) {
-                eN.buildString(builder, tabs);
+                expression.buildString(builder, tabs);
                 builder.append("\t".repeat(tabs) + rightParen + "\r\n");
             }
         }
