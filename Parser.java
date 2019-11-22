@@ -1,3 +1,10 @@
+/**
+ * Michel Mottet Ellnefjärd, miel9299, 8512270052
+ * Fabian Johansson,
+ */
+
+
+
 import java.io.IOException;
 
 
@@ -120,14 +127,17 @@ public class Parser implements IParser {
             StringBuilder sb = new StringBuilder();
             if (assign != null) {
                 ResultNode currentResult = (ResultNode) assign.evaluate(args);
-                sb.append(currentResult.getId() + " = " + currentResult.getCurrentValue() + "\n");
+                sb.append(currentResult.getId() + " = " + String.format("%.01f\n",currentResult.getCurrentValue()));
                 System.out.println(sb);  //ta bort innan inlämmning
 
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] != null) {
 
                         ResultNode curRes = (ResultNode) args[i];
-
+                        if (curRes.getId().equals(currentResult.getId())) {
+                            args[i] = currentResult;
+                            break;
+                        }
                     } else {
                         args[i] = currentResult;
                         break;
@@ -164,7 +174,7 @@ public class Parser implements IParser {
                 if (tok.current().token() == Token.ASSIGN_OP) {
                     assign = tok.current();
                     tok.moveNext();
-                    expression = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok, null);
                     if (tok.current().token() == Token.SEMICOLON) {
                         semiColon = tok.current();
                         tok.moveNext();
@@ -200,18 +210,18 @@ public class Parser implements IParser {
 
     private class ExpressionNode implements INode {
         private ExpressionNode expression = null;
-        private TermNode term, prevOperator;
-        private Lexeme addOrSub;
+        private TermNode term;
+        private Lexeme addOrSub, prevOperator;
 
-        public ExpressionNode(Tokenizer tok) throws ParserException, IOException, TokenizerException {
-
+        public ExpressionNode(Tokenizer tok, Lexeme prevOperator) throws ParserException, IOException, TokenizerException {
+            this.prevOperator = prevOperator;
             if (tok.current().token() == Token.IDENT || tok.current().token() == Token.INT_LIT
                     || tok.current().token() == Token.LEFT_PAREN) {
                 term = new TermNode(tok);
                 if (tok.current().token() == Token.ADD_OP || tok.current().token() == Token.SUB_OP) {
                     addOrSub = tok.current();
                     tok.moveNext();
-                    expression = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok, addOrSub);
                 }
             } else {
                 throw new ParserException(PARSE_EXCEPTION_MESSAGE);
@@ -230,6 +240,9 @@ public class Parser implements IParser {
                 Double exprNodeValue = Double.parseDouble(expression.evaluate(args).toString());
 
                 if (addOrSub.token() == Token.ADD_OP) {
+                    if (prevOperator != null && prevOperator.token() == Token.SUB_OP) {
+                        return exprNodeValue - termNodeValue;
+                    }
                     return termNodeValue + exprNodeValue;
                 } else {
                     return termNodeValue - exprNodeValue;
@@ -252,7 +265,6 @@ public class Parser implements IParser {
     }
 
     private class TermNode implements INode {
-        private Double prevDouble = 0.0;
         private FactorNode factor;
         private TermNode term = null;
         private Lexeme multOrDiv;
@@ -274,46 +286,49 @@ public class Parser implements IParser {
 
         @Override
         public Object evaluate(Object[] args) throws Exception {
+
+            Double prevDouble = 0.0;
+            int i = 0;
+            Double termNodeValue;
             Double factorNodeValue = Double.parseDouble(factor.evaluate(args).toString());
 
+            if (args[0] != null) {
+                for (i = 0; i < args.length; i++) {
+                    if (args[i] == null) {
+                        break;
+                    }
+                    ResultNode node = (ResultNode) args[i];
+                    if (node.getId() == "/") {
+                        prevDouble = node.getCurrentValue();
+                        args[i] = null;
+                        break;
+                    }
+                }
+            }
             if (term == null) {
                 return factorNodeValue;
             } else {
 
                 if (multOrDiv.token() == Token.DIV_OP && prevDouble == 0.0) {
                     if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
-                        term.setPrevDouble(factorNodeValue);
+                        args[i] = new ResultNode("/", factorNodeValue);
                         return term.evaluate(args);
                     } else {
-                        factorNodeValue = Double.parseDouble(factor.evaluate(args).toString());
+                        termNodeValue = Double.parseDouble(term.evaluate(args).toString());
                     }
+                    return factorNodeValue / termNodeValue;
                 } else if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
                     Double temp = prevDouble / factorNodeValue;
-                    term.setPrevDouble(temp);
+                    args[i] = new ResultNode("/", temp);
                     return term.evaluate(args);
+                } else if (multOrDiv.token() == Token.DIV_OP) {
+                    factorNodeValue = prevDouble / factorNodeValue;
+                    return factorNodeValue / Double.parseDouble(term.evaluate(args).toString());
                 } else {
-                    Double termValue = Double.parseDouble(term.evaluate(args).toString());
-                    return factorNodeValue * termValue;
+                    termNodeValue = Double.parseDouble(term.evaluate(args).toString());
+                    return factorNodeValue * termNodeValue;
                 }
-
-                /*
-                Double termValue;
-                if (term.multOrDiv != null && term.multOrDiv.token() == Token.DIV_OP) {
-                    Double secondTermFactor = Double.parseDouble(term.getFactor().evaluate(args).toString());
-                    factorNodeValue = factorNodeValue / secondTermFactor;
-                    termValue = Double.parseDouble(term.term.evaluate(args).toString());
-                } else {
-                    termValue = Double.parseDouble(term.evaluate(args).toString());
-                }
-                if (multOrDiv.token() == Token.MULT_OP) {
-                    return factorNodeValue * termValue;
-                } else {
-                    return factorNodeValue / termValue;
-
             }
-
-*/
-            }return factorNodeValue;
         }
 
         @Override
@@ -333,10 +348,6 @@ public class Parser implements IParser {
         public FactorNode getFactor() {
             return factor;
         }
-
-        public void setPrevDouble(double d) {
-            prevDouble = d;
-        }
     }
 
     private class FactorNode implements INode {
@@ -350,7 +361,7 @@ public class Parser implements IParser {
                 firstLex = tok.current();
                 if (tok.current().token() == Token.LEFT_PAREN) {
                     tok.moveNext();
-                    expression = new ExpressionNode(tok);
+                    expression = new ExpressionNode(tok, null);
                     if (tok.current().token() == Token.RIGHT_PAREN) {
                         rightParen = tok.current();
                     } else {
@@ -370,7 +381,6 @@ public class Parser implements IParser {
                     return firstLex.value();
                 } else if (firstLex.token() == Token.IDENT) {
                     for (int i = 0; i < args.length; i++) {
-
                         ResultNode resultNode = (ResultNode) args[i];
                         if (resultNode.getId().equals(firstLex.value().toString())) {
                             return resultNode.getCurrentValue();
