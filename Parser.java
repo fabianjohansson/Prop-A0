@@ -128,11 +128,8 @@ public class Parser implements IParser {
             if (assign != null) {
                 ResultNode currentResult = (ResultNode) assign.evaluate(args);
                 sb.append(currentResult.getId() + " = " + String.format("%.01f\n",currentResult.getCurrentValue()));
-                System.out.println(sb);  //ta bort innan inlämmning
-
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] != null) {
-
                         ResultNode curRes = (ResultNode) args[i];
                         if (curRes.getId().equals(currentResult.getId())) {
                             args[i] = currentResult;
@@ -143,8 +140,6 @@ public class Parser implements IParser {
                         break;
                     }
                 }
-
-
                 sb.append(statement.evaluate(args));
             }
             return sb;
