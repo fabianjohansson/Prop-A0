@@ -1,5 +1,5 @@
 /**
- * Michel Mottet Ellnefjärd, miel9299, 8512270052
+ * Michel Mottet Ellnefjärd, miel9299
  * Fabian Johansson,
  */
 
